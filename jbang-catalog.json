@@ -1,3 +1,8 @@
 {
-
+  "aliases": {
+    "hal-op": {
+      "script-ref": "org.jboss.hal:hal-op-standalone:0.2.1",
+      "description": "HAL standalone console on premise"
+    }
+  }
 }
