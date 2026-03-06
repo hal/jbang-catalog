@@ -1,7 +1,7 @@
 {
   "aliases": {
     "hal-op": {
-      "script-ref": "org.jboss.hal:hal-op-standalone:0.2.3:runner",
+      "script-ref": "org.jboss.hal:hal-op-standalone:0.2.4:runner",
       "description": "HAL standalone console on premise"
     }
   }
