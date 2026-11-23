@@ -8,4 +8,32 @@ on:
 
 jobs:
   build:
-    uses: jbanghub/.github/.github/workflows/shared-build.yml@main
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Wait for Maven Central sync
+      if: github.event_name == 'push'
+      run: |
+        SCRIPT_REF=$(jq -r '.aliases["hal-op"]["script-ref"]' jbang-catalog.json)
+        IFS=: read -r GROUP ARTIFACT VERSION CLASSIFIER <<< "$SCRIPT_REF"
+        GROUP_PATH="${GROUP//.//}"
+        URL="https://repo1.maven.org/maven2/${GROUP_PATH}/${ARTIFACT}/${VERSION}/${ARTIFACT}-${VERSION}-${CLASSIFIER}.jar"
+        echo "Waiting for $URL"
+        for i in $(seq 1 30); do
+          if curl -sf -o /dev/null "$URL"; then
+            echo "Artifact available on Maven Central"
+            exit 0
+          fi
+          echo "Waiting for Maven Central sync... (attempt $i/30)"
+          sleep 60
+        done
+        echo "Timeout waiting for Maven Central sync"
+        exit 1
+
+    - uses: jbangdev/setup-jbang@main
+
+    - name: Run JBang Tester
+      run: |
+        jbang trust add https://github.com/jbanghub/.github
+        jbang https://github.com/jbanghub/.github/blob/main/.github/tester.java
